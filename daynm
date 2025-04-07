@@ -1,0 +1,96 @@
+#include <iostream>
+#include <stdexcept>
+
+class DynamicArray {
+private:
+    int* data;
+    int _size;
+    int _capacity;
+
+    void resize(int new_capacity) {
+        int* new_data = new int[new_capacity];
+        for (int i = 0; i < _size; ++i)
+            new_data[i] = data[i];
+        delete[] data;
+        data = new_data;
+        _capacity = new_capacity;
+    }
+
+public:
+    DynamicArray() {
+        _capacity = 4;
+        _size = 0;
+        data = new int[_capacity];
+    }
+
+    ~DynamicArray() {
+        delete[] data;
+    }
+
+    void push_back(int value) {
+        if (_size == _capacity)
+            resize(_capacity * 2);
+        data[_size++] = value;
+    }
+
+    void pop_back() {
+        if (_size == 0)
+            throw std::underflow_error("Array is empty");
+        _size--;
+        if (_size > 0 && _size <= _capacity / 4)
+            resize(_capacity / 2);
+    }
+
+    int get(int index) const {
+        if (index < 0 || index >= _size)
+            throw std::out_of_range("Index out of bounds");
+        return data[index];
+    }
+
+    void set(int index, int value) {
+        if (index < 0 || index >= _size)
+            throw std::out_of_range("Index out of bounds");
+        data[index] = value;
+    }
+
+    int size() const {
+        return _size;
+    }
+
+    int capacity() const {
+        return _capacity;
+    }
+
+    bool empty() const {
+        return _size == 0;
+    }
+
+    void print() const {
+        std::cout << "[";
+        for (int i = 0; i < _size; ++i) {
+            std::cout << data[i];
+            if (i != _size - 1)
+                std::cout << ", ";
+        }
+        std::cout << "]\n";
+    }
+};
+
+// ------------------------
+// Test code
+// ------------------------
+
+int main() {
+    DynamicArray arr;
+
+    // Add elements
+    for (int i = 0; i < 10; ++i)
+        arr.push_back(i * 10);
+    arr.print();
+
+    // Remove last two elements
+    arr.pop_back();
+    arr.pop_back();
+    arr.print();
+
+    // Access and modify
