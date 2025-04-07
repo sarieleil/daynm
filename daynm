@@ -1,96 +1,95 @@
 #include <iostream>
 #include <stdexcept>
 
-class DynamicArray {
+class DynamicTable {
 private:
-    int* data;
-    int _size;
-    int _capacity;
+    int* table;
+    int num;       // Number of elements
+    int capacity;  // Total size of allocated array
 
     void resize(int new_capacity) {
-        int* new_data = new int[new_capacity];
-        for (int i = 0; i < _size; ++i)
-            new_data[i] = data[i];
-        delete[] data;
-        data = new_data;
-        _capacity = new_capacity;
+        int* new_table = new int[new_capacity];
+        for (int i = 0; i < num; ++i)
+            new_table[i] = table[i];
+        delete[] table;
+        table = new_table;
+        capacity = new_capacity;
     }
 
 public:
-    DynamicArray() {
-        _capacity = 4;
-        _size = 0;
-        data = new int[_capacity];
+    DynamicTable() {
+        capacity = 4; // Initial capacity
+        num = 0;
+        table = new int[capacity];
     }
 
-    ~DynamicArray() {
-        delete[] data;
+    ~DynamicTable() {
+        delete[] table;
     }
 
-    void push_back(int value) {
-        if (_size == _capacity)
-            resize(_capacity * 2);
-        data[_size++] = value;
+    // Table-Insert (CLRS-style)
+    void insert(int x) {
+        if (num == capacity)
+            resize(2 * capacity); // Double when full
+        table[num++] = x;
     }
 
-    void pop_back() {
-        if (_size == 0)
-            throw std::underflow_error("Array is empty");
-        _size--;
-        if (_size > 0 && _size <= _capacity / 4)
-            resize(_capacity / 2);
+    // Delete-Last (optional in CLRS)
+    void delete_last() {
+        if (num == 0)
+            throw std::underflow_error("Empty table");
+        num--;
+        if (num > 0 && num <= capacity / 4)
+            resize(capacity / 2); // Halve when 1/4 full
     }
 
-    int get(int index) const {
-        if (index < 0 || index >= _size)
+    int get(int i) const {
+        if (i < 0 || i >= num)
             throw std::out_of_range("Index out of bounds");
-        return data[index];
+        return table[i];
     }
 
-    void set(int index, int value) {
-        if (index < 0 || index >= _size)
+    void set(int i, int value) {
+        if (i < 0 || i >= num)
             throw std::out_of_range("Index out of bounds");
-        data[index] = value;
+        table[i] = value;
     }
 
     int size() const {
-        return _size;
+        return num;
     }
 
-    int capacity() const {
-        return _capacity;
-    }
-
-    bool empty() const {
-        return _size == 0;
+    int get_capacity() const {
+        return capacity;
     }
 
     void print() const {
         std::cout << "[";
-        for (int i = 0; i < _size; ++i) {
-            std::cout << data[i];
-            if (i != _size - 1)
+        for (int i = 0; i < num; ++i) {
+            std::cout << table[i];
+            if (i != num - 1)
                 std::cout << ", ";
         }
         std::cout << "]\n";
     }
 };
 
-// ------------------------
-// Test code
-// ------------------------
-
+// --- Testing (matches CLRS-style test logic) ---
 int main() {
-    DynamicArray arr;
+    DynamicTable T;
 
-    // Add elements
     for (int i = 0; i < 10; ++i)
-        arr.push_back(i * 10);
-    arr.print();
+        T.insert(i * 5); // Table-Insert
 
-    // Remove last two elements
-    arr.pop_back();
-    arr.pop_back();
-    arr.print();
+    T.print();
 
-    // Access and modify
+    T.delete_last(); // Shrinks eventually
+    T.delete_last();
+
+    T.print();
+
+    std::cout << "Size: " << T.size() << ", Capacity: " << T.get_capacity() << "\n";
+    std::cout << "T[0] = " << T.get(0) << "\n";
+
+    return 0;
+}
